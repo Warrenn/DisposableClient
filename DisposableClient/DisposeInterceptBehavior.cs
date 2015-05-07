@@ -24,10 +24,10 @@ namespace DisposableClient
 
         public IMethodReturn Invoke(IMethodInvocation input, GetNextInterceptionBehaviorDelegate getNext)
         {
-            if (input.MethodBase.Name != "Dispose") return getNext()(input, getNext);
-            var returnValue = input.CreateMethodReturn(null, input.Arguments);
+            if (input.MethodBase.Name != "Dispose") 
+                return getNext()(input, getNext);
             dispose((T) input.Target);
-            return returnValue;
+            return input.CreateMethodReturn(null, input.Arguments);
         }
 
         public bool WillExecute
