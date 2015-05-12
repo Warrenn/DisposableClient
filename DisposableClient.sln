@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		VisualStudioHelper.ttinclude = VisualStudioHelper.ttinclude
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject", "UnitTestProject\UnitTestProject.csproj", "{4266B805-D972-4669-AB69-19C477DBC486}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WcfServiceLibrary", "WcfServiceLibrary\WcfServiceLibrary.csproj", "{79162145-3100-4D9A-B0BB-D8F893F75C10}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{447A0F98-5BF4-46F7-A42B-B65BB9F8B35F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{447A0F98-5BF4-46F7-A42B-B65BB9F8B35F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{447A0F98-5BF4-46F7-A42B-B65BB9F8B35F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4266B805-D972-4669-AB69-19C477DBC486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4266B805-D972-4669-AB69-19C477DBC486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4266B805-D972-4669-AB69-19C477DBC486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4266B805-D972-4669-AB69-19C477DBC486}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79162145-3100-4D9A-B0BB-D8F893F75C10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79162145-3100-4D9A-B0BB-D8F893F75C10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79162145-3100-4D9A-B0BB-D8F893F75C10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79162145-3100-4D9A-B0BB-D8F893F75C10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
