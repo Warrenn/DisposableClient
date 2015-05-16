@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.ServiceModel;
-using System.Threading;
 using DisposableClient;
 using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.InterceptionExtension;
@@ -39,7 +38,7 @@ namespace UnitTestProject
         }
 
         [TestMethod]
-        public void PerformanceTestWithDisposableService()
+        public void PerformanceTestWithDisposableIlOpCode()
         {
             var container = new UnityContainer();
             var factoryType = DisposableIlOpCode<ITestService>.CreateType();
@@ -53,6 +52,15 @@ namespace UnitTestProject
             ClientBase<ITestService>.CacheSetting = CacheSetting.AlwaysOn;
             var container = new UnityContainer();
             container.RegisterType<ITestService, TestServiceClient>(new ContainerControlledLifetimeManager());
+            TestBaseMethod(container);
+        }
+
+        [TestMethod]
+        public void PerformanceTestWithProxy()
+        {
+            var instance = DisposableProxy<ITestService>.CreateInstance();
+            var container = new UnityContainer();
+            container.RegisterInstance(instance, new ContainerControlledLifetimeManager());
             TestBaseMethod(container);
         }
 

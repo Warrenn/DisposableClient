@@ -34,7 +34,7 @@ namespace UnitTestProject
         }
 
         [TestMethod]
-        public void PerformanceTestWithDisposableService()
+        public void PerformanceTestWithDisposableIlOpCode()
         {
             var container = new UnityContainer();
             var factoryType = DisposableIlOpCode<IService1>.CreateType();
@@ -48,6 +48,15 @@ namespace UnitTestProject
             ClientBase<IService1>.CacheSetting = CacheSetting.AlwaysOn;
             var container = new UnityContainer();
             container.RegisterType<IService1, Service1Client>(new ContainerControlledLifetimeManager());
+            TestBaseMethod(container);
+        }
+        
+        [TestMethod]
+        public void PerformanceTestWithProxy()
+        {
+            var instance = DisposableProxy<IService1>.CreateInstance();
+            var container = new UnityContainer();
+            container.RegisterInstance(instance, new ContainerControlledLifetimeManager());
             TestBaseMethod(container);
         }
 

@@ -80,6 +80,7 @@
   <ItemGroup>
     <Compile Include="ConfigChannelFactory.cs" />
     <Compile Include="DisposableIlOpCode.cs" />
+    <Compile Include="DisposableProxy.cs" />
     <Compile Include="DisposeInterceptBehavior.cs" />
     <Compile Include="DisposeMethod.cs" />
     <Compile Include="IProxyFactory.cs" />
