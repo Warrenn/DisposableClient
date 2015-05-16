@@ -8,7 +8,7 @@ namespace DisposableClient
     {
         private readonly Action<T> dispose;
 
-        public DisposeInterceptBehavior():this(DisposableFactory<T>.DisposeMethod)
+        public DisposeInterceptBehavior():this(DisposeMethod.DisposeCommunicationObject)
         {
         }
 
@@ -24,8 +24,10 @@ namespace DisposableClient
 
         public IMethodReturn Invoke(IMethodInvocation input, GetNextInterceptionBehaviorDelegate getNext)
         {
-            if (input.MethodBase.Name != "Dispose") 
+            if (input.MethodBase.Name != "Dispose")
+            {
                 return getNext()(input, getNext);
+            }
             dispose((T) input.Target);
             return input.CreateMethodReturn(null, input.Arguments);
         }

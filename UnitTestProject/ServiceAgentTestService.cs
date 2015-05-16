@@ -12,8 +12,7 @@ namespace UnitTestProject
     {
         public ServiceAgentTestService()
         {
-            channelFactory = new ChannelFactory<ITestService>(new BasicHttpBinding(), "http://localhost:7654/testservice");
-            channelFactory.Open();
+            channelFactory = new ChannelFactory<ITestService>("ITestService");
         }
 
         public DataContractTest PeformSomething(DataContractTest contract)

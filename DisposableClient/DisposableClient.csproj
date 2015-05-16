@@ -78,8 +78,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DisposableFactory.cs" />
+    <Compile Include="ConfigChannelFactory.cs" />
+    <Compile Include="DisposableIlOpCode.cs" />
     <Compile Include="DisposeInterceptBehavior.cs" />
+    <Compile Include="DisposeMethod.cs" />
     <Compile Include="IProxyFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProxyFactory.cs" />

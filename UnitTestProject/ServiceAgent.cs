@@ -1,12 +1,12 @@
 ﻿using System;
 using System.ServiceModel;
+using DisposableClient;
 
 namespace UnitTestProject
 {
-    public class ServiceAgent<TService> : IDisposable
+    public class ServiceAgent<TService>
     {
         protected ChannelFactory<TService> channelFactory;
-
 
         public T Call<T>(Func<TService, T> func)
         {
@@ -17,32 +17,8 @@ namespace UnitTestProject
             }
             finally
             {
-                var communicationObject = client as ICommunicationObject;
-                if ((communicationObject != null) &&
-                    (communicationObject.State != CommunicationState.Closed))
-                {
-                    if (communicationObject.State == CommunicationState.Faulted)
-                    {
-                        communicationObject.Abort();
-                    }
-                    else
-                    {
-                        communicationObject.Close();
-                    }
-                }
+                DisposeMethod.DisposeCommunicationObject(client);
             }
-        }
-
-
-        public void Dispose()
-        {
-            if (channelFactory.State == CommunicationState.Closed) return;
-            if (channelFactory.State == CommunicationState.Faulted)
-            {
-                channelFactory.Abort();
-                return;
-            }
-            channelFactory.Close();
         }
     }
 }

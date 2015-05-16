@@ -14,8 +14,7 @@ namespace DisposableClient
         #region ctors
         public ProxyFactory()
         {
-            var element = DisposableFactory<T>.GetEndPointFromConfig();
-            factory = new ChannelFactory<T>(element.Name);
+            factory = new ConfigChannelFactory<T>();
             service = factory.CreateChannel();
         }
 
@@ -55,10 +54,8 @@ namespace DisposableClient
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
         public void Dispose()
         {
-            DisposableFactory<T>
-                .DisposeMethod(service);
-            DisposableFactory<ChannelFactory<T>>
-                .DisposeMethod(factory);
+            DisposeMethod.DisposeCommunicationObject(service);
+            DisposeMethod.DisposeCommunicationObject(factory);
         }
 
         #endregion

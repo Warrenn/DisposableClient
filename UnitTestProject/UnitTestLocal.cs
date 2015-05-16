@@ -24,9 +24,9 @@ namespace UnitTestProject
             stopwatch.Start();
             var controller = container.Resolve<TestController>();
             controller.TestMethod();
+            container.Dispose();
             stopwatch.Stop();
             Trace.Write(stopwatch.ElapsedTicks);
-
             host.Close();
         }
 
@@ -34,7 +34,7 @@ namespace UnitTestProject
         public void PerformanceTestServiceAgent()
         {
             var container = new UnityContainer();
-            container.RegisterType<ITestService, ServiceAgentTestService>();
+            container.RegisterType<ITestService, ServiceAgentTestService>(new ContainerControlledLifetimeManager());
             TestBaseMethod(container);
         }
 
@@ -42,8 +42,8 @@ namespace UnitTestProject
         public void PerformanceTestWithDisposableService()
         {
             var container = new UnityContainer();
-            var factoryType = DisposableFactory<ITestService>.CreateDisposableType();
-            container.RegisterType(typeof(ITestService), factoryType, new InjectionConstructor());
+            var factoryType = DisposableIlOpCode<ITestService>.CreateType();
+            container.RegisterType(typeof(ITestService), factoryType, new ContainerControlledLifetimeManager(), new InjectionConstructor());
             TestBaseMethod(container);
         }
 
@@ -52,22 +52,22 @@ namespace UnitTestProject
         {
             ClientBase<ITestService>.CacheSetting = CacheSetting.AlwaysOn;
             var container = new UnityContainer();
-            container.RegisterType<ITestService, TestServiceClient>();
+            container.RegisterType<ITestService, TestServiceClient>(new ContainerControlledLifetimeManager());
             TestBaseMethod(container);
         }
 
         [TestMethod]
         public void PerformanceTestWithInterception()
         {
-            var instance = (new ChannelFactory<ITestService>(new BasicHttpBinding())).CreateChannel(new EndpointAddress("http://localhost:7654/testservice"));
+            var instance = (new ChannelFactory<ITestService>("ITestService")).CreateChannel();
 
             var proxy = Intercept.ThroughProxy(
                 instance,
                 new TransparentProxyInterceptor(),
-                new[] {new DisposeInterceptBehavior<ITestService>()});
+                new[] { new DisposeInterceptBehavior<ITestService>() });
 
             var container = new UnityContainer();
-            container.RegisterInstance(proxy);
+            container.RegisterInstance(proxy, new ContainerControlledLifetimeManager());
             TestBaseMethod(container);
         }
     }

@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Configuration;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.ServiceModel;
-using System.ServiceModel.Channels;
-using System.ServiceModel.Configuration;
-using System.ServiceModel.Description;
 
 namespace DisposableClient
 {
-    public class DisposableFactory<T> :
-        ChannelFactory<T> where T : class
+    public static class DisposableIlOpCode<T> where T : class
     {
         private const MethodAttributes MethodAttributes =
             System.Reflection.MethodAttributes.Public |
@@ -25,81 +18,31 @@ namespace DisposableClient
             System.Reflection.CallingConventions.HasThis |
             System.Reflection.CallingConventions.ExplicitThis;
 
-        public DisposableFactory(string endpointConfigurationName)
-            : base(endpointConfigurationName)
+        public static T WrapInstance(T instance, Action<T> dispose = null)
         {
-
+            var type = CreateType();
+            if (dispose == null) dispose = DisposeMethod.DisposeCommunicationObject;
+            return (T)Activator.CreateInstance(type, instance, dispose);
         }
-
-        public DisposableFactory(string endpointConfigurationName, EndpointAddress remoteAddress)
-            : base(endpointConfigurationName, remoteAddress)
-        {
-
-        }
-
-        public DisposableFactory(Binding binding)
-            : base(binding)
-        {
-
-        }
-
-        public DisposableFactory(Binding binding, string remoteAddress)
-            : base(binding, remoteAddress)
-        {
-
-        }
-
-        public DisposableFactory(Binding binding, EndpointAddress remoteAddress)
-            : base(binding, remoteAddress)
-        {
-
-        }
-
-        public DisposableFactory(ServiceEndpoint endpoint)
-            : base(endpoint)
-        {
-
-        }
-
+        
         public static Action<T> CreateDisposeMethod()
         {
-            return DisposeMethod;
+            return DisposeMethod.DisposeCommunicationObject;
         }
 
-        public static void DisposeMethod(T instance)
-        {
-            var communicationObject = instance as ICommunicationObject;
-            if (communicationObject == null) return;
-            var state = communicationObject.State;
-            if (state == CommunicationState.Closed) return;
-            try
-            {
-                if (state == CommunicationState.Faulted)
-                {
-                    communicationObject.Abort();
-                    return;
-                }
-                communicationObject.Close();
-            }
-            catch (CommunicationException ex)
-            {
-                Trace.TraceError(ex.ToString());
-                if (state == CommunicationState.Closed) return;
-                communicationObject.Abort();
-            }
-        }
-
-        public static Type CreateDisposableType()
+        public static Type CreateType()
         {
             var contractType = typeof(T);
             var disposeType = typeof(Action<T>);
-            var disposeFactoryType = typeof(DisposableFactory<T>);
+            var disposableIlOpCodeType = typeof(DisposableIlOpCode<T>);
+            var configType = typeof(ConfigChannelFactory<T>);
 
-            var newTypeName = contractType.Name + "_" + Guid.NewGuid().ToString("N");
+
+            var newTypeName = contractType.Name + "_IlOpCode" + Guid.NewGuid().ToString("N");
             var currentDomain = AppDomain.CurrentDomain;
-            var aname = Assembly.GetAssembly(disposeFactoryType).GetName();
+            var aname = Assembly.GetAssembly(disposableIlOpCodeType).GetName();
             var asmBuilder = currentDomain.DefineDynamicAssembly(aname, AssemblyBuilderAccess.Run);
-            var modBuilder = asmBuilder.DefineDynamicModule(newTypeName + "_Module");
+            var modBuilder = asmBuilder.DefineDynamicModule(newTypeName + "_IlOpCodeModule");
 
             var classType = (contractType.IsInterface) ? typeof(object) : contractType;
             var interfaceTypes = (contractType.IsInterface)
@@ -114,8 +57,8 @@ namespace DisposableClient
             var disposeMethodBuilder = tbuilder.DefineField("disposeMethod", disposeType, FieldAttributes.Private);
             var superConstructor = typeof(Object).GetConstructor(Type.EmptyTypes);
 
-            var disposeMethodInfo = disposeFactoryType.GetMethod("CreateDisposeMethod");
-            var createChannelMethodInfo = disposeFactoryType.GetMethod("CreateChannelFromConfig");
+            var disposeMethodInfo = disposableIlOpCodeType.GetMethod("CreateDisposeMethod");
+            var createChannelMethodInfo = configType.GetMethod("CreateChannel", BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public);
 
             var defaultCtor = tbuilder.DefineConstructor(
                 MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
@@ -198,57 +141,6 @@ namespace DisposableClient
             disposeGenerator.Emit(OpCodes.Ret);
 
             return tbuilder.CreateType();
-        }
-
-        public static T CreateWrapper(T instance, Action<T> dispose = null)
-        {
-            var type = CreateDisposableType();
-            if (dispose == null) dispose = DisposeMethod;
-            return (T)Activator.CreateInstance(type, instance, dispose);
-        }
-
-        public static ChannelEndpointElement GetEndPointFromConfig()
-        {
-            var contractType = typeof (T);
-
-            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            var sectionGroup = ServiceModelSectionGroup.GetSectionGroup(config);
-            if (sectionGroup == null)
-            {
-                throw new ConfigurationErrorsException();
-            }
-
-            var client = sectionGroup.Client;
-            var endPoint = client.Endpoints.OfType<ChannelEndpointElement>()
-                .FirstOrDefault(ep =>
-                    (ep.Contract == contractType.Name) ||
-                    (ep.Contract == contractType.AssemblyQualifiedName) ||
-                    (ep.Contract == contractType.FullName));
-            if (endPoint == null)
-            {
-                throw new ConfigurationErrorsException();
-            }
-            return endPoint;
-        }
-
-        public override T CreateChannel(EndpointAddress address, Uri via)
-        {
-            var instance = base.CreateChannel(address, via);
-            return CreateWrapper(instance);
-        }
-
-        public static T CreateChannelFromConfig()
-        {
-            var element = GetEndPointFromConfig();
-            var factory = new ChannelFactory<T>(element.Name);
-            return factory.CreateChannel();
-        }
-
-        public static T CreateDisposableChannel()
-        {
-            var element = GetEndPointFromConfig();
-            var factory = new DisposableFactory<T>(element.Name);
-            return factory.CreateChannel();
         }
     }
 }
