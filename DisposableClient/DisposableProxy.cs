@@ -16,6 +16,7 @@ namespace DisposableClient
         private static readonly MethodInfo DisposeMethodInfo
             = typeof(IDisposable).GetMethod("Dispose");
 
+        #region constructor
         public DisposableProxy(T target, Action<T> disposeAction)
             : base(typeof(T))
         {
@@ -23,6 +24,9 @@ namespace DisposableClient
             this.target = target;
         }
 
+        #endregion
+
+        #region static methods
         public static T CreateInstance(Action<T> dispose = null)
         {
             var instance = ConfigChannelFactory<T>.CreateChannel();
@@ -35,7 +39,9 @@ namespace DisposableClient
             var proxy = new DisposableProxy<T>(instance, dispose);
             return proxy.GetTransparentProxy() as T;
         }
+        #endregion
 
+        #region RealProxy override
         public override IMessage Invoke(IMessage msg)
         {
             var methodCall = (IMethodCallMessage)msg;
@@ -49,6 +55,9 @@ namespace DisposableClient
             return new ReturnMessage(result, null, 0, methodCall.LogicalCallContext, methodCall);
         }
 
+        #endregion
+
+        #region IRemotingTypeInfo
         public bool CanCastTo(Type fromType, object o)
         {
             return
@@ -57,5 +66,7 @@ namespace DisposableClient
         }
 
         public string TypeName { get; set; }
+
+        #endregion
     }
 }
