@@ -79,6 +79,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfigChannelFactory.cs" />
+    <Compile Include="DisposableChannelFactory.cs" />
+    <Compile Include="DisposableInstanceProvider.cs" />
     <Compile Include="DisposableIlOpCode.cs" />
     <Compile Include="DisposableProxy.cs" />
     <Compile Include="DisposeInterceptBehavior.cs" />

@@ -8,7 +8,7 @@ namespace DisposableClient
 {
     public class DisposableProxy<T> :
         RealProxy,
-        IRemotingTypeInfo where T : class
+        IRemotingTypeInfo
     {
         private readonly T target;
         private readonly Action<T> disposeAction;
@@ -35,9 +35,9 @@ namespace DisposableClient
 
         public static T WrapInstance(T instance, Action<T> dispose = null)
         {
-            dispose = dispose ?? DisposeMethod.DisposeCommunicationObject;
+            dispose = dispose ?? (o => DisposeMethod.DisposeCommunicationObject(o));
             var proxy = new DisposableProxy<T>(instance, dispose);
-            return proxy.GetTransparentProxy() as T;
+            return (T)proxy.GetTransparentProxy();
         }
         #endregion
 

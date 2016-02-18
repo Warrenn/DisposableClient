@@ -8,7 +8,7 @@ using System.ServiceModel.Description;
 namespace DisposableClient
 {
     public class ConfigChannelFactory<T> :
-        ChannelFactory<T> where T : class
+        ChannelFactory<T> 
     {
         public ConfigChannelFactory()
             : this(GetEndPointFromConfig().Name)
